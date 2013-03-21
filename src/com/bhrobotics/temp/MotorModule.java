@@ -1,29 +1,34 @@
 package com.bhrobotics.temp;
 
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
 
 public class MotorModule {
-	private Victor[] controllers = new Victor[2];
+	private Talon[] controllers = new Talon[2];
 	private Solenoid out;
 	private Solenoid in;
-        public static final double THRESHOLD = 0.005;
+        public static final double THRESHOLD = 0.05;
                 
 	public MotorModule(int motorPortOne, int motorPortTwo, Solenoid solenoidOne, Solenoid solenoidTwo) {
-		controllers[0] = new Victor(1, motorPortOne);
-		controllers[1] = new Victor(1, motorPortTwo);
+		controllers[0] = new Talon(1, motorPortOne);
+		controllers[1] = new Talon(1, motorPortTwo);
 		in = solenoidOne;
 		out = solenoidTwo;
 		setHighSpeed();
 	}
 
-	public Victor[] getControllers() {
+	public Talon[] getControllers() {
 		return controllers;
 	}
 
 	public void set(double value) {
-		getControllers()[0].set(value);
+            if(Math.abs(value) < THRESHOLD) {
+		getControllers()[0].set(0.0);
+		getControllers()[1].set(0.0);
+            } else {
+                getControllers()[0].set(value);
 		getControllers()[1].set(value);
+            }
 	}
 
 	public double get() {

@@ -1,16 +1,28 @@
 package com.bhrobotics.temp;
 
 public class HoverDrive {
-	//private Victor victor = new Victor(1,1);
-	//private Victor victor2 = new Victor(1,2);
-	//private Victor victor3 = new Victor(1,3);
-	//private Victor victor4 = new Victor(1,4);
-	//private Joystick joystick = new Joystick(1,1);
-	
-	//public void hover() {
-	//	victor.setFlotation(joystick.getRawY - joystick.getRawX);
-	//	victor2.setFlotation(joystick.getRawY - joystick.getRawX);
-	//	victor3.setFlotation(joystick.getRawY - joystick.getRawX);
-	//	victor4.setFlotation(joystick.getRawY - joystick.getRawX);
-	//}
+    
+    /*private Joystick joystick;
+    private MotorModule left;
+    private MotorModule right;
+    private HoverModule hoverLeft;
+    private HoverModule hoverRight;
+    
+    public HoverDrive(Joystick joystick, MotorModule left, MotorModule right, HoverModule hoverLeft, HoverModule hoverRight) {
+        this.joystick = joystick;
+        this.left = left;
+        this.right = right;
+        this.hoverLeft = hoverLeft;
+        this.hoverRight = hoverRight;
+    }
+
+    public void hoverInit() {
+    hoverLeft.hover();
+    hoverRight.hover();
+    }
+    
+    public void hover() {
+    left.set(joystick.getRawY - joystick.getRawX);
+    left.set(joystick.getRawY - joystick.getRawX);
+    }*/
 }

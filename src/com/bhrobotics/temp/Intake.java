@@ -2,18 +2,18 @@ package com.bhrobotics.temp;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
 
 public class Intake {
-	public static final double MAX_SPEED = 0.5;
+	public static final double MAX_SPEED = 1.0;
 	public static final double FEEDER_POSITION = 0.0;
 	public static final double GROUND_POSITION = 0.0;
 	public static final double START_POSITION = 0.0;
 
 	private double hingeSpeed = 0;
-	private Victor hinge;
-	private Victor rollerBottom;
-	private Victor rollerTop;
+	private Talon hinge;
+	private Talon rollerBottom;
+	private Talon rollerTop;
 	//private Encoder encoder;
 	private double goalValue = 0;
 	private DigitalInput topLimit;
@@ -22,7 +22,7 @@ public class Intake {
 	public final static double UP_VALUE = -MAX_SPEED;
 	public final static double STOP = 0.0;
 
-	public Intake(Victor hinge, Victor rollerBottom, Victor rollerTop, DigitalInput top, DigitalInput  bottom) {
+	public Intake(Talon hinge, Talon rollerBottom, Talon rollerTop, DigitalInput top, DigitalInput  bottom) {
 		this.hinge = hinge;
 		this.rollerBottom = rollerBottom;
 		this.rollerTop = rollerTop;

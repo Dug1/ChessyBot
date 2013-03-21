@@ -3,7 +3,7 @@ package com.bhrobotics.temp;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -13,10 +13,10 @@ public class Shooter {
         public static final double THRESHOLD = 0.001;
 	private double speed = MAX_SPEED;
 	private double stop = 0.0;
-        private boolean armPushed = false;
+        public boolean armReady = true;
 
-	private Victor outside;
-	private Victor inside;
+	private Talon outside;
+	private Talon inside;
 	//private Encoder encoder;
 	//private PIDController controller;
 	private boolean stopped = false;
@@ -53,7 +53,7 @@ public class Shooter {
 		}
 	}
 	
-	public Shooter(Victor fast, Victor slow, Encoder encoder) {
+	public Shooter(Talon fast, Talon slow, Encoder encoder) {
 		this.outside = fast;
 		this.inside = slow;
 		//this.encoder = encoder;
@@ -64,7 +64,7 @@ public class Shooter {
 	
 	public void turnOn() {
 		//controller.setGoal(speed);
-                //outside.set(controller.adjust(encoder.getRate()/14000 * 60));
+                outside.set(speed);
                 inside.set(speed);
 		//if(Math.abs(controller.getError()) < THRESHOLD) {
                     this.extend();
@@ -76,8 +76,8 @@ public class Shooter {
 	
 	public void turnOff() {
                 //controller.setGoal(0.0);
-                //outside.set(controller.adjust(encoder.getRate()));
-                inside.set(speed);
+                outside.set(0.0);
+                inside.set(0.0);
                 retract();
 		//pistonThread.interrupt();
 	}
@@ -100,8 +100,28 @@ public class Shooter {
 		//encoder.stop();
 	}
         
+        
+        public void autoExtend(int linger, int time) {
+            if(armReady) {
+                extend();
+                timer.schedule(new TimerTask() {
+                        
+                    public void run() {
+                        retract();
+                    }
+                    
+                }, linger);
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        armReady = true;
+                    }
+                }, time);
+                armReady = false;
+            }
+        }
+        
         public void extend() {
-            if(!armPushed) {
+            /*if(armReady) {
                 topSolenoid.set(false);
                 bottomSolenoid.set(true);
                 timer.schedule(new TimerTask() {
@@ -111,12 +131,19 @@ public class Shooter {
                     }
                     
                 }, 500);
-            }
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        armReady = true;
+                    }
+                }, 1000);
+                armReady = false;
+            }*/
+             topSolenoid.set(false);
+             bottomSolenoid.set(true);  
         }
         
         public void retract() {
             topSolenoid.set(true);
             bottomSolenoid.set(false);
-            armPushed = false;
         }
 }

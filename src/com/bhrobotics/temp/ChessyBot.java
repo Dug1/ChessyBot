@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -30,8 +30,8 @@ public class ChessyBot extends IterativeRobot {
 	private Joystick intakeJoystick;
 	private MotorModule left;
 	private MotorModule right;
-	//private Intake intake;
-	//private Shooter shooter;
+	private Intake intake;
+	private Shooter shooter;
 	private DigitalInput reset;
 	private Relay compressor;
 	private CheesyDrive cheesy;
@@ -43,7 +43,8 @@ public class ChessyBot extends IterativeRobot {
 	private DigitalInput input;
 	private DigitalInput other;
 	private boolean runningAuto = false;
-	private Timer timer;
+        private boolean initialWait = true;
+	private Timer timer = new Timer();
 	private DigitalInput valve;
 	private double turningScale;
 	private double normalTurning = 0.6;
@@ -57,22 +58,43 @@ public class ChessyBot extends IterativeRobot {
 		intakeJoystick = new Joystick(2);
 		left = new MotorModule(1, 3, solenoidOne, solenoidTwo);
 		right = new MotorModule(2, 4, solenoidOne,solenoidTwo);
-		//intake = new Intake(new Victor(1, 5), new Victor(1, 6), new Victor(1, 7), new DigitalInput(1,1), new DigitalInput(1,2));
-		//shooter = new Shooter(new Victor(1, 8), new Victor(1, 9), null);
+                intake = new Intake(new Talon(1, 5), new Talon(1, 6), new Talon(1, 7), new DigitalInput(1,1), new DigitalInput(1,2));
+		shooter = new Shooter(new Talon(1, 8), new Talon(1, 9), null);
 		valve = new DigitalInput(1, 3);
 		compressor = new Relay(1, 8);
 		cheesy = new CheesyDrive(driverJoystick);
 		stick = new OneStickDrive();
-		xAxis = new TurnCalculator(driverJoystick,2,1);
+		//xAxis = new TurnCalculator(driverJoystick,2,1);
 		twist = new TurnCalculator(driverJoystick,2,6);
 		style = stick;
 		calculator = twist;
 		reset = new DigitalInput(1,9);
 		//shooter.start();
 	}
-
+        
+        
+        public void autonomousPeriodic() {
+            if(!initialWait) {
+                shooter.autoExtend(500,4000);
+            }
+            //Compressor
+            if (!valve.get()) {
+		compressor.set(Relay.Value.kForward);
+            } else {
+		compressor.set(Relay.Value.kOff);
+            }
+        }
+        
 	public void autonomousInit() {
-		/*Timer timer = new Timer(); 
+                shooter.turnOn();
+                shooter.retract();
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        initialWait = false;
+                    }
+                }, 3000);
+                /*
+		Timer timer = new Timer(); 
 
 		//stop all functions
 		timer.schedule(new TimerTask() {
@@ -96,8 +118,8 @@ public class ChessyBot extends IterativeRobot {
 
 		}, 1000);
 
-		intake.setHingeSpeed(Intake.UP_VALUE); */
-	}
+		intake.setHingeSpeed(Intake.UP_VALUE);*/
+        }
 
 	private class StopMovementTask extends TimerTask {
 
@@ -112,7 +134,10 @@ public class ChessyBot extends IterativeRobot {
 	 */
 
 	public void teleopInit() {
-	}
+            shooter.turnOff();
+            shooter.retract();
+            timer.cancel();
+        }
 
 	public void teleopPeriodic() {
 		//Compressor
@@ -132,13 +157,13 @@ public class ChessyBot extends IterativeRobot {
 		}
 
 		// setTwist
-		if (driverJoystick.getRawButton(11)) {
+		/*if (driverJoystick.getRawButton(11)) {
 			calculator = twist;
 			System.out.println("Switched to twist");
 		} else if (driverJoystick.getRawButton(12)) {
 			calculator = xAxis;
 			System.out.println("Switched to x-axis");
-		}
+		}*/
 
 		// gear shift
 		if (driverJoystick.getRawButton(1)) {
@@ -150,14 +175,17 @@ public class ChessyBot extends IterativeRobot {
 		}
 
 		// intake hinge
-
-		/*if (intakeJoystick.getRawButton(9) && !intake.topPressed()) {
+                /*
+		if (intakeJoystick.getRawButton(9) && !intake.topPressed()) {
 			intake.bumpUp();                    //start position
 		} else if (intakeJoystick.getRawButton(11) && !intake.bottomPressed()) {
-			intake.bumpDown();                     //ground position
-		} else if (intakeJoystick.getRawButton(1)) {
+			intake.bumpDown();                     //ground position*/
+	/*	} else */ if (intakeJoystick.getRawButton(1)) { 
 			intake.manualBump(intakeJoystick.getY() * intake.MAX_SPEED);
-		}*/
+		} else {
+                        intake.stop();
+                }   
+        
 		//intake.setHingePosition();
 
 		//reset intake
@@ -167,8 +195,10 @@ public class ChessyBot extends IterativeRobot {
 
 		// intake rollers
                 
-                /*
-		if(!intakeJoystick.getRawButton(12)) {
+                
+		if(intakeJoystick.getRawButton(11)) {
+                    intake.turnOnTop();
+                     /*
 			if (intakeJoystick.getRawButton(5)) {
 				intake.turnOnTop();
 			} else {
@@ -180,25 +210,31 @@ public class ChessyBot extends IterativeRobot {
 			} else {
 				intake.turnOffBottom();
 			}
+                        */
 		} else {
-			intake.flush();
-		}*/
+			intake.turnOffTop();
+		}
 
 		// shooter
-                /*
-		shooter.setSpeed((1 - driverJoystick.getRawAxis(5)) / 2);
+		shooter.setSpeed((1-driverJoystick.getRawAxis(5)/2));
 		if (driverJoystick.getRawButton(2)) {
 			shooter.turnOn();
-                        intake.turnOnBottom();
+                        //intake.turnOnBottom();
 		} else {
 			shooter.turnOff();
-		}*/
+                }
+                
+                if(driverJoystick.getRawButton(4)) {
+                    shooter.autoExtend(500,4000);
+                } else {
+                    shooter.retract();
+                }
 		
 		// turning scale
 		if (driverJoystick.getRawButton(6)) {
-			turningScale = reallySlowTurning;
+                    turningScale = reallySlowTurning;
 		} else {
-			turningScale = normalTurning;
+                    turningScale = normalTurning;
 		}
 
 		//		if(!runningAuto) {
@@ -234,10 +270,11 @@ public class ChessyBot extends IterativeRobot {
 
 		//if (!runningAuto) {
 		// drive train
+                
 		double[] coordinates = style.drive(driverJoystick.getRawButton(5), calculator);
 		double x = coordinates[0];
 		double y = coordinates[1];
-		if (Math.abs(x) < Math.abs(0.6 * y)) {
+		if (Math.abs(x) < Math.abs(0.6 * y) && Math.abs(x) < 0.05) {
 			x = 0;
 		} else if (Math.abs(y) < Math.abs(0.6 * x)) {
 			y = 0;
@@ -246,11 +283,17 @@ public class ChessyBot extends IterativeRobot {
 		left.set(-y + x);
 		right.set(y + x);
 		//}
+                
+                // hang
+                /*if (driverJoystick.getRawButton(8)) {
+                    left.set(1);
+                    right.set(1);
+                }*/
 
 		System.out.println(debugString());
 	}
 
 	public String debugString() {
-		return "[left]:" + left.get() + "[right]:" + right.get();
+		return "[left]:" + left.get() + "[right]:" + right.get() + "[shooter]:" + shooter.getSpeed();
 	}
 }
