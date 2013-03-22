@@ -7,7 +7,7 @@ public class MotorModule {
 	private Talon[] controllers = new Talon[2];
 	private Solenoid out;
 	private Solenoid in;
-        public static final double THRESHOLD = 0.05;
+        public static final double THRESHOLD = 0.1;
                 
 	public MotorModule(int motorPortOne, int motorPortTwo, Solenoid solenoidOne, Solenoid solenoidTwo) {
 		controllers[0] = new Talon(1, motorPortOne);
@@ -26,8 +26,8 @@ public class MotorModule {
 		getControllers()[0].set(0.0);
 		getControllers()[1].set(0.0);
             } else {
-                getControllers()[0].set(value);
-		getControllers()[1].set(value);
+                getControllers()[0].set((1/(1-THRESHOLD))*(value-((Math.abs(value)/value)*THRESHOLD)));
+		getControllers()[1].set((1/(1-THRESHOLD))*(value-((Math.abs(value)/value)*THRESHOLD)));
             }
 	}
 
