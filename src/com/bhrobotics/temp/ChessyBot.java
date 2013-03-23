@@ -51,12 +51,10 @@ public class ChessyBot extends IterativeRobot {
     private Solenoid solenoidOne = new Solenoid(1, 1);
     private Solenoid solenoidTwo = new Solenoid(1, 2);
     private boolean shootReady;
-    private static final int INITIALAUTOTURN = 0;
     private static final int AWAYFROMPYRAMID = 0;
-    private static final int LEFTTURN = 0;
-    private static final int BACKTOFRONT = 0;
-    private static final int ALIGNSHOOTER = 0;
-    private static final int STOPMOVING = 0;
+    private static final int TURN = AWAYFROMPYRAMID + 0;
+    private static final int STOPMOVING = TURN + 0;
+    private DigitalInput autoTurnToggle;
 
     public void robotInit() {
         driverJoystick = new Joystick(1);
@@ -74,6 +72,7 @@ public class ChessyBot extends IterativeRobot {
         style = stick;
         calculator = twist;
         reset = new DigitalInput(1, 9);
+        autoTurnToggle = new DigitalInput(1,1);
         //shooter.start();
     }
 
@@ -122,14 +121,6 @@ public class ChessyBot extends IterativeRobot {
          intake.setHingeSpeed(Intake.UP_VALUE);*/
          shootReady = false;
          
-         //Initial Right Turn
-         timer.schedule(new TimerTask() {
-             public void run() {
-                 left.set(1);
-                 right.set(1);
-             }
-         }, INITIALAUTOTURN);
-         
          //Move Forward From Start
          timer.schedule(new TimerTask() {
              public void run() {
@@ -138,30 +129,23 @@ public class ChessyBot extends IterativeRobot {
              }
          }, AWAYFROMPYRAMID);
          
-         //Left Turn
-         timer.schedule(new TimerTask() {
-             public void run() {
-                 left.set(-1);
-                 right.set(-1);
-             }
-         }, LEFTTURN);
-         
-         //Move Back to Front
-         timer.schedule(new TimerTask() {
-             public void run() {
-                 left.set(1);
-                 right.set(-1);
-             }
-         }, BACKTOFRONT);
-         
-         //Align Shooter
-         timer.schedule(new TimerTask() {
-             public void run() {
-                 left.set(1);
-                 right.set(1);
-             }
-         }, ALIGNSHOOTER);
-         
+         //Turn
+         if (autoTurnToggle.get()) {
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    left.set(1);                //Right turn if DI is on
+                    right.set(1);
+                }
+            }, TURN);
+         } else {
+             timer.schedule(new TimerTask() {
+                public void run() {
+                    left.set(-1);               //Left turn if DI is off
+                    right.set(-1);
+                }
+            }, TURN);
+         }
+          
          //Stop Moving
          timer.schedule(new TimerTask() {
              public void run() {
