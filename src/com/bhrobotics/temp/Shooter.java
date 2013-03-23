@@ -137,7 +137,7 @@ public class Shooter {
             }, (linger + time));
         }
     }
-
+ 
     public void extend() {
         /*if(armReady) {
          topSolenoid.set(false);

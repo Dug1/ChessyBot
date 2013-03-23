@@ -50,6 +50,13 @@ public class ChessyBot extends IterativeRobot {
     private double reallySlowTurning = 0.2;
     private Solenoid solenoidOne = new Solenoid(1, 1);
     private Solenoid solenoidTwo = new Solenoid(1, 2);
+    private boolean shootReady;
+    private static final int INITIALAUTOTURN = 0;
+    private static final int AWAYFROMPYRAMID = 0;
+    private static final int LEFTTURN = 0;
+    private static final int BACKTOFRONT = 0;
+    private static final int ALIGNSHOOTER = 0;
+    private static final int STOPMOVING = 0;
 
     public void robotInit() {
         driverJoystick = new Joystick(1);
@@ -71,12 +78,16 @@ public class ChessyBot extends IterativeRobot {
     }
 
     public void autonomousPeriodic() {
-        shooter.autoExtend(500, 4000);
         //Compressor
         if (!valve.get()) {
             compressor.set(Relay.Value.kForward);
         } else {
             compressor.set(Relay.Value.kOff);
+        }
+            
+        //Shoot
+        if (shootReady) {
+             shooter.autoExtend(500, 4000);
         }
     }
 
@@ -109,6 +120,56 @@ public class ChessyBot extends IterativeRobot {
          }, 1000);
 
          intake.setHingeSpeed(Intake.UP_VALUE);*/
+         shootReady = false;
+         
+         //Initial Right Turn
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(1);
+                 right.set(1);
+             }
+         }, INITIALAUTOTURN);
+         
+         //Move Forward From Start
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(1);
+                 right.set(-1);
+             }
+         }, AWAYFROMPYRAMID);
+         
+         //Left Turn
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(-1);
+                 right.set(-1);
+             }
+         }, LEFTTURN);
+         
+         //Move Back to Front
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(1);
+                 right.set(-1);
+             }
+         }, BACKTOFRONT);
+         
+         //Align Shooter
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(1);
+                 right.set(1);
+             }
+         }, ALIGNSHOOTER);
+         
+         //Stop Moving
+         timer.schedule(new TimerTask() {
+             public void run() {
+                 left.set(0);
+                 right.set(0);
+                 shootReady = true;
+             }
+         }, STOPMOVING);
     }
 
     private class StopMovementTask extends TimerTask {
